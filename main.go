@@ -130,7 +130,6 @@ func main() {
 
 	// Your route definitions
 	router.GET("/shorten/*url", shorten)
-	router.GET("/shorten", getAllData)
 	router.GET("/:shorturl", redirect)
 	router.GET("/original/:url", getOriginalURL)
 
