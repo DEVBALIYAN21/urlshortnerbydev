@@ -18,6 +18,8 @@ var store = struct {
 }{data: make(map[string]string)}
 
 const maxLength = 6
+
+// Load data from the JSON file
 func loadDataFromFile() {
 	file, err := os.Open("data.json")
 	if err != nil {
@@ -34,6 +36,8 @@ func loadDataFromFile() {
 		fmt.Println("Error decoding JSON:", err)
 	}
 }
+
+// Save data to the JSON file
 func saveDataToFile() {
 	store.RLock()
 	defer store.RUnlock()
@@ -52,6 +56,7 @@ func saveDataToFile() {
 	}
 }
 
+// Generate a short URL
 func generateShortURL(url string) string {
 	hash := md5.Sum([]byte(url))
 	hashedString := hex.EncodeToString(hash[:])
@@ -65,6 +70,7 @@ func generateShortURL(url string) string {
 	return short
 }
 
+// Find the original URL from the short URL
 func findOriginalURL(shortURL string) string {
 	store.RLock()
 	defer store.RUnlock()
@@ -72,24 +78,31 @@ func findOriginalURL(shortURL string) string {
 	return store.data[shortURL]
 }
 
+// Shorten the given URL
 func shorten(c *gin.Context) {
-	url := c.Param("url")[1:]
+	url := c.Param("url")
 	if len(url) == 0 {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Please enter the URL"})
 		return
 	}
 
 	shortenedURL := generateShortURL(url)
-	short := "http://localhost:8080/" + shortenedURL
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:8080" // Default to localhost if not set
+	}
+	short := baseURL + "/" + shortenedURL
 	c.IndentedJSON(http.StatusOK, gin.H{"shortened_url": short})
 }
 
+// Get all data
 func getAllData(c *gin.Context) {
 	store.RLock()
 	defer store.RUnlock()
 	c.IndentedJSON(http.StatusOK, store.data)
 }
 
+// Get the original URL from a short URL
 func getOriginalURL(c *gin.Context) {
 	shortURL := c.Param("url")
 	original := findOriginalURL(shortURL)
@@ -99,11 +112,10 @@ func getOriginalURL(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Not found"})
 	}
 }
+
+// Redirect to the original URL
 func redirect(c *gin.Context) {
 	shortURL := c.Param("shorturl")
-	if shortURL[0] == '/' {
-		shortURL = shortURL[1:]
-	}
 	original := findOriginalURL(shortURL)
 	if len(original) > 0 {
 		c.Redirect(http.StatusFound, original)
@@ -112,13 +124,21 @@ func redirect(c *gin.Context) {
 	}
 }
 
+// Main function
 func main() {
-	loadDataFromFile()
-
 	router := gin.Default()
+
+	// Your route definitions
 	router.GET("/shorten/*url", shorten)
 	router.GET("/shorten", getAllData)
 	router.GET("/:shorturl", redirect)
 	router.GET("/original/:url", getOriginalURL)
-	router.Run("localhost:8080")
+
+	// Use the PORT environment variable
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default to 8080 if PORT is not set
+	}
+
+	router.Run(":" + port) // Start the server on the assigned port
 }
