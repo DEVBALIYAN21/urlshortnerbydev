@@ -3,44 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <title>URL Shortener</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Light gray background */
+        }
+        
+        .maindiv {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            height: 70%; /* This ensures the .maindiv takes up the full height of the viewport */
+        }
+        
+        .insider {
+            background-color: #fff; /* White background */
+            border: 1px solid #ddd; /* Light gray border */
+            padding: 20px;
+            margin-bottom: 7%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            width: 400px; /* Set a fixed width to prevent the div from collapsing */
+        }
+        
+        label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 20px; /* Add a right margin to prevent the textbox from collapsing with the div border */
+            box-sizing: border-box; /* Ensure the width includes the padding and border */
+        }
+        
+        button {
+            background-color: #4CAF50; /* Green background */
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        
+        button:hover {
+            background-color: #3e8e41; /* Darker green on hover */
+        }
+        
+        a {
+            color: #337ab7; /* Blue color for links */
+            text-decoration: none;
+        }
+        
+        a:hover {
+            color: #23527c; /* Darker blue on hover */
+        }
+        
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        .copy-button {
+            background-color: #337ab7; /* Blue background */
+            color: #fff;
+            padding: 10px 20px;
+
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .copy-button:hover {
+            background-color: #23527c; /* Darker blue on hover */
+        }
+        
+        .copy-image {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        h1{
+            text-align: center;
+            margin-bottom: 7%;
+        }
+    </style>
 </head>
 <body>
-    <label for="original">Enter the URL: </label><br><br>
-    <input id="original" type="text"><br><br>
-    <button onclick="caller()">Shorten URL</button><br><br>
     
-    <div id="result"></div> <!-- For displaying the shortened URL -->
-
-</body>
-<script>
-    function caller() {
-        var url = document.getElementById("original").value;
-        
-        if (!url) {
-            alert("Please enter a valid URL.");
-            return;
+    <div class="maindiv">
+        <h1>URL SHORTNER</h1>
+        <div class="insider">
+            <label for="original">Enter the URL (use https:// before)</label>
+            <input id="original" type="text">
+            <button onclick="caller()">Short Url</button>
+            <p class="result">Your Shorted Url is: <a id="result" target="_blank" rel="noopener noreferrer"></a>
+                <button class="copy-button" onclick="copyUrl()">
+                    <i class="far fa-copy"></i>
+                </button>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function caller() {
+            var url = document.getElementById("original").value;
+            var short = document.getElementById("result");
+            var apiurl = 'https://ue.up.railway.app/shorten/' + url;
+            
+            fetch(apiurl)
+                .then(response => response.json())
+                .then(data => {
+                    short.href = data.shortened_url;
+                    short.innerHTML = data.shortened_url;
+                })
+                .catch(error => console.error('error: ', error));
         }
-
-        // Encode the URL
-        var encodedUrl = encodeURIComponent(url);
-        var apiurl = 'https://ue.up.railway.app/shorten/' + encodedUrl;
         
-        fetch(apiurl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Display the shortened URL
-                document.getElementById('result').innerHTML = "Shortened URL: <a href='" + data.shortened_url + "' target='_blank'>" + data.shortened_url + "</a>";
-            })
-            .catch(error => {
-                console.error('error: ', error);
-                document.getElementById('result').textContent = "An error occurred. Please try again.";
-            });
-    }
-</script>
+        function copyUrl() {
+            var url = document.getElementById("result").href;
+            var textarea = document.createElement("textarea");
+            textarea.value = url;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            alert("URL copied to clipboard!");
+        }
+    </script>
 </html>
