@@ -8,18 +8,39 @@
 <body>
     <label for="original">Enter the URL: </label><br><br>
     <input id="original" type="text"><br><br>
-    <button onclick="caller()">Fetch Data</button>
+    <button onclick="caller()">Shorten URL</button><br><br>
+    
+    <div id="result"></div> <!-- For displaying the shortened URL -->
+
 </body>
 <script>
     function caller() {
         var url = document.getElementById("original").value;
-        var apiurl = 'https://ue.up.railway.app/shorten/' + url;
+        
+        if (!url) {
+            alert("Please enter a valid URL.");
+            return;
+        }
+
+        // Encode the URL
+        var encodedUrl = encodeURIComponent(url);
+        var apiurl = 'https://ue.up.railway.app/shorten/' + encodedUrl;
         
         fetch(apiurl)
-            .then(response => response.json())
-            .then(data => console.log(data))
-            .catch(error => console.error('error: ', error));
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Display the shortened URL
+                document.getElementById('result').innerHTML = "Shortened URL: <a href='" + data.shortened_url + "' target='_blank'>" + data.shortened_url + "</a>";
+            })
+            .catch(error => {
+                console.error('error: ', error);
+                document.getElementById('result').textContent = "An error occurred. Please try again.";
+            });
     }
-    
 </script>
 </html>

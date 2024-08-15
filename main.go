@@ -127,14 +127,9 @@ func main() {
 	router := gin.Default()
 
 	// Custom CORS configuration to allow your frontend origin
-	config := cors.Config{
-		AllowOrigins:     []string{"https://your-frontend-domain.com", "http://127.0.0.1:5500"}, // Replace with your actual frontend URL
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Origin", "Content-Type"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}
-	router.Use(cors.New(config))
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://127.0.0.1:5500"}
+	router.Use(cors.New(corsConfig))
 
 	// Route definitions
 	router.GET("/shorten/*url", shorten)
