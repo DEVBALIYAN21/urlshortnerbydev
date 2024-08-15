@@ -81,17 +81,14 @@ func findOriginalURL(shortURL string) string {
 
 // Shorten the given URL
 func shorten(c *gin.Context) {
-	url := c.Param("url")
+	url := c.Param("url")[1:] // Remove the leading '/'
 	if len(url) == 0 {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Please enter the URL"})
 		return
 	}
 
 	shortenedURL := generateShortURL(url)
-	baseURL := os.Getenv("BASE_URL")
-	if baseURL == "" {
-		baseURL = "http://localhost:8080" // Default to localhost if not set
-	}
+	baseURL := os.Getenv("BASE_URL") // Railway will use this environment variable
 	short := baseURL + "/" + shortenedURL
 	c.IndentedJSON(http.StatusOK, gin.H{"shortened_url": short})
 }
@@ -128,13 +125,23 @@ func redirect(c *gin.Context) {
 // Main function
 func main() {
 	router := gin.Default()
-	router.Use(cors.Default())
-	// Your route definitions
+
+	// Custom CORS configuration to allow your frontend origin
+	config := cors.Config{
+		AllowOrigins:     []string{"https://your-frontend-domain.com", "http://127.0.0.1:5500"}, // Replace with your actual frontend URL
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}
+	router.Use(cors.New(config))
+
+	// Route definitions
 	router.GET("/shorten/*url", shorten)
 	router.GET("/:shorturl", redirect)
 	router.GET("/original/:url", getOriginalURL)
 
-	// Use the PORT environment variable
+	// Use the PORT environment variable from Railway
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // Default to 8080 if PORT is not set
