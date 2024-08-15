@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -127,7 +128,7 @@ func redirect(c *gin.Context) {
 // Main function
 func main() {
 	router := gin.Default()
-
+	router.Use(cors.Default())
 	// Your route definitions
 	router.GET("/shorten/*url", shorten)
 	router.GET("/:shorturl", redirect)

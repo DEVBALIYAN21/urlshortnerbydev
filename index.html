@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+</head>
+<body>
+    <label for="original">Enter the URL: </label><br><br>
+    <input id="original" type="text"><br><br>
+    <button onclick="caller()">Fetch Data</button>
+</body>
+<script>
+    function caller() {
+        var url = document.getElementById("original").value;
+        var apiurl = 'https://ue.up.railway.app/shorten/' + url;
+        
+        fetch(apiurl)
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('error: ', error));
+    }
+    
+</script>
+</html>
