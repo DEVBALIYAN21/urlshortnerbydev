@@ -89,7 +89,7 @@ func shorten(c *gin.Context) {
 
 	shortenedURL := generateShortURL(url)
 	baseURL := os.Getenv("BASE_URL") // Railway will use this environment variable
-	short := baseURL + "/" + shortenedURL
+	short := baseURL  + shortenedURL
 	c.IndentedJSON(http.StatusOK, gin.H{"shortened_url": short})
 }
 
