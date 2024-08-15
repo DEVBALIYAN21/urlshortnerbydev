@@ -128,7 +128,7 @@ func main() {
 
 	// Custom CORS configuration to allow your frontend origin
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://127.0.0.1:5500", "https://shotnerurls.netlify.app/"}
+	corsConfig.AllowOrigins = []string{"http://127.0.0.1:5500", "https://shotnerurls.netlify.app"}
 	router.Use(cors.New(corsConfig))
 
 	// Route definitions
